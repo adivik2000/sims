@@ -1,3 +1,7 @@
+module Spec # :nodoc:
+  module Rails
+    module Matchers
+
 begin
 require 'hpricot'
 rescue LoadError
@@ -11,9 +15,7 @@ Dir.glob(File.dirname(__FILE__) + '/matchers/*.rb').each do |rb|
   require rb
 end
 
-module Spec # :nodoc:
-  module Rails
-    module Matchers
+
 
       def have_button expected
         ButtonMatcher.new expected
