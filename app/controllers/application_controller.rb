@@ -13,11 +13,6 @@ class ApplicationController < ActionController::Base
   # Uncomment the :secret if you're not using the cookie session store
   protect_from_forgery # :secret => 'f94867ed424ccea84323251f7aa373db'
   
-  # See ActionController::Base for details 
-  # Uncomment this to filter the contents of submitted sensitive data parameters
-  # from your application log (in this case, all fields with names like "password"). 
-  filter_parameter_logging :password
-
   before_filter :fixie6iframe,:options_for_microsoft_office_protocol_discovery,:authenticate, :authorize#, :current_district
 
   SUBDOMAIN_MATCH=/(^sims$)|(^sims-open$)/
