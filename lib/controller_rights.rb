@@ -20,9 +20,9 @@ private
     end
   end
 
-  def to_s
-    self.class.to_s.titleize.split(" Controller").first
-  end
+#  def to_s
+#    self.class.to_s.titleize.split(" Controller").first
+#  end
 
   def read_actions
      ['index', 'select', 'show', 'preview', 'read' , 'raw', 'part']
