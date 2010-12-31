@@ -1,173 +1,244 @@
-ActionController::Routing::Routes.draw do |map|
+Sims::Application.routes.draw do
+  match '/doc/' => 'doc#index', :as => :doc
 
-  map.doc '/doc/', :controller => 'doc'
-  map.resources :unattached_interventions, :member => {:update_end_date => :put }
+  resources :unattached_interventions do
+    member do
+      put :update_end_date
+    end
 
-  map.resources :grouped_progress_entries, :member =>{:aggregate => :get }
-
-  map.resources :flag_descriptions
-
-  map.resources :school_teams
-
-  map.resources :consultation_form_requests
-
-  map.resources :consultation_forms
-
-  map.resources :team_consultations, :member => {:complete => :put}
-
-  map.stats '/stats', :controller => 'main', :action => 'stats'
-
-
-  map.spell_check '/spell_check/', :controller => 'spell_check'
-
-  map.change_password '/change_password', :controller=> 'login', :action => 'change_password'
-  map.download_file '/file/:filename', :controller=>'file', :action => 'download', :requirements => { :filename => %r([^/;,?]+) }
-
-  map.preview_graph '/preview_graph/:intervention_id', :controller => 'interventions/probe_assignments', :action => 'preview_graph'
-  
-  map.resources :help
-  map.resources :quicklist_items
-
-
-  map.resources :tiers, :member=>{:move => :put }
-
-  map.resources :user_school_assignments
-
-  map.namespace :district do |district|
-    district.resources :schools
-    district.resources :users
-    district.resources :students, :collection => {:check_id_state => :get}
-    district.resources :flag_categories, :name_prefix=>nil
   end
 
-  map.namespace :school do |school|
-    school.resources :students
+  resources :grouped_progress_entries do
+    member do
+      get :aggregate
+    end
+
   end
 
-  map.resources :custom_probes
+  resources :flag_descriptions
+  resources :school_teams
+  resources :consultation_form_requests
+  resources :consultation_forms
 
-  map.resources :news_items
+  resources :team_consultations do
+    member do
+      put :complete
+    end
+
+  end
+
+  match '/stats' => 'main#stats', :as => :stats
+  match '/spell_check/' => 'spell_check#index', :as => :spell_check
+  match '/change_password' => 'login#change_password', :as => :change_password
+  match '/file/:filename' => 'file#download', :as => :download_file, :constraints => { :filename => /[^\/;,?]+/ }
+  match '/preview_graph/:intervention_id' => 'interventions/probe_assignments#preview_graph', :as => :preview_graph
+  resources :help
+  resources :quicklist_items
+  resources :tiers do
+    member do
+      put :move
+    end
+  end
+
+  resources :user_school_assignments
+  namespace :district do
+    resources :schools
+    resources :users
+    resources :students do
+      collection do
+        get :check_id_state
+      end
+    end
+    resources :flag_categories
+  end
+
+  namespace :school do
+    resources :students
+  end
+
+  resources :custom_probes
+  resources :news_items
+  resources :principal_overrides do
+    member do
+      put :undo
+    end
+  end
+
+  match '/logout' => 'login#logout', :as => :logout
+  resources :groups do
+    member do
+      delete :remove_user
+      get :add_student_form
+      get :show_special
+      post :add_student
+      delete :remove_special
+      delete :remove_student
+      get :add_special_form
+      get :add_user_form
+      post :add_special
+      post :add_user
+    end
+  end
+
+  resources :checklists
+  resources :recommendations
+  resources :student_comments
+  match '/custom_flags/delete/:id' => 'custom_flags#destroy', :as => :delete_custom_flag
+  resources :custom_flags
+  resources :enrollments
+  resources :students do
+    collection do
+      post :member_search
+      post :select
+      post :grade_search
+      get :search
+    end
+  end
+
+  resources :schools do
+    collection do
+      post :select
+    end
 
 
+  end
+  resources :users
+  resources :districts do
+    collection do
+      get :bulk_import_form
+      get :export
+      get :bulk_import
+    end
+    member do
+      get :logs
+      put :reset_password
+      put :recreate_admin
+    end
+  end
 
-  map.resources :principal_overrides, :member => {:undo=> :put}
-
-
-
-
-
-  map.logout '/logout',:controller=>'login',:action=>'logout'
-
-  map.resources :groups, :member=>{:add_student_form => :get,:add_student => :post , :remove_student => :delete,
-            :add_user_form => :get, :add_user => :post, :remove_user => :delete,
-            :show_special => :get, :remove_special => :delete, :add_special_form => :get, :add_special =>:post }
-
-
-
-  map.resources :checklists
-  map.resources :recommendations
-
-  map.resources :student_comments
-
-
-  map.delete_custom_flag '/custom_flags/delete/:id', :controller=>"custom_flags",:action=>'destroy'
-
-  map.resources :custom_flags
-
-
-  map.resources :enrollments
-
-  map.resources :students, :collection => {:search => :get, :select => :post, :member_search=>:post, :grade_search=>:post}
-
-  map.resources :schools, :collection => {:select => :post}
-
-
-  map.resources :users
-
-
-  map.resources :districts, :member => {:reset_password => :put, :recreate_admin => :put, :logs => :get}, 
-    :collection=>{:bulk_import_form => :get, :bulk_import =>:post, :bulk_import => :get, :export => :get}
-
-
-  map.namespace :checklist_builder do |checklist_builder|
-    checklist_builder.resources :checklists,  :member => { :preview => :get, :new_from_this => :post } do |checklist|
-      checklist.resources :questions, :member => {:move=> :post},:name_prefix=>"checklist_builder_" do |question|
-        question.resources :elements, :member => {:move=> :post},:name_prefix=>"checklist_builder_" do |element|
-          element.resources :answers, :member => {:move => :post}, :name_prefix=>"checklist_builder_"
+  namespace :checklist_builder do
+    resources :checklists do
+      resources :questions do
+        resources :elements do
+          resources :answers do
+            member do
+              post :move
+            end
+          end
         end
       end
     end
   end
 
-  map.namespace :intervention_builder do |intervention_builder|
-    intervention_builder.resources :probes, :member=>{:disable => :put}
-    intervention_builder.resources :goals, :member=>{:disable => :put, :move=>:put},
-      :collection=>{:regenerate_intervention_pdfs => :put,  :interventions_without_recommended_monitors => :get} do |goal|
-      goal.resources :objectives,  :member=>{:disable =>:put, :move =>:put }, :name_prefix=>"intervention_builder_" do |objective|
-        objective.resources :categories,:member=>{:disable =>:put, :move =>:put }, :name_prefix=>"intervention_builder_" do |category|
-          category.resources :interventions ,:member=>{:disable =>:put, :move =>:put },:collection=>{:sort => :post}, :name_prefix=>"intervention_builder_" 
-        end
+  namespace :intervention_builder do
+    resources :probes do
+      member do
+        put :disable
       end
+
     end
-  end
-  
-  map.namespace :interventions do |intervention|
-    intervention.resources :goals, :collection=>{:select=>:post} do |goal|
-      goal.resources :objectives, :collection => {:select=> :post},:name_prefix=>"interventions_" do |objective|
-        objective.resources :categories, :collection => {:select=> :post},:name_prefix=>"interventions_" do |category|
-          category.resources :definitions, :collection => {:select => :post}, :name_prefix=>"interventions_"
+    resources :goals do
+      resources :objectives do
+        resources :categories do
+          resources :interventions do
+            collection do
+              post :sort
+            end
+            member do
+              put :move
+              put :disable
+            end
+          end
         end
       end
     end
   end
 
-  map.resources :interventions, :member=>{:undo_end =>:put,:end=>:put}, :collection=>{:quicklist_options =>:get,:quicklist=>:post, :ajax_probe_assignment => :get} do |intervention|
-    intervention.resources :comments, :controller=>"interventions/comments"
-    intervention.resources :participants, :controller=>"interventions/participants"
-    intervention.resources :probe_assignments, :controller=>"interventions/probe_assignments", :collection=>{:disable_all=>:put}, :member => {:preview_graph =>:get} do |probe_assignment|
-      probe_assignment.resources :probes, :controller=>"interventions/probes", :name_prefix=>"", 
-        :collection=>{:new_assessment=>:get, :update_assessment=>:get,:save_assessment=>:post}
+  namespace :interventions do
+    resources :goals do
+      resources :objectives do
+        resources :categories do
+          resources :definitions do
+            collection do
+              post :select
+            end
+          end
+        end
+      end
     end
   end
 
-  # The priority is based upon order of creation: first created -> highest priority.
+  resources :interventions do
+    resources :comments
+    resources :participants
+    resources :probe_assignments do
+      resources :probes do
+        collection do
+          get :new_assessment
+          get :update_assessment
+          post :save_assessment
+        end
+      end
+    end
+  end
+
+  match '/' => 'main#index'
+  match '/:controller(/:action(/:id))'
+end
+
+  # The priority is based upon order of creation:
+  # first created -> highest priority.
 
   # Sample of regular route:
-  #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
+  #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
 
   # Sample of named route:
-  #   map.purchase 'products/:id/purchase', :controller => 'catalog', :action => 'purchase'
+  #   match 'products/:id/purchase' => 'catalog#purchase', :as => :purchase
   # This route can be invoked with purchase_url(:id => product.id)
 
   # Sample resource route (maps HTTP verbs to controller actions automatically):
-  #   map.resources :products
+  #   resources :products
 
   # Sample resource route with options:
-  #   map.resources :products, :member => { :short => :get, :toggle => :post }, :collection => { :sold => :get }
+  #   resources :products do
+  #     member do
+  #       get 'short'
+  #       post 'toggle'
+  #     end
+  #
+  #     collection do
+  #       get 'sold'
+  #     end
+  #   end
 
   # Sample resource route with sub-resources:
-  #   map.resources :products, :has_many => [ :comments, :sales ], :has_one => :seller
-  
+  #   resources :products do
+  #     resources :comments, :sales
+  #     resource :seller
+  #   end
+
   # Sample resource route with more complex sub-resources
-  #   map.resources :products do |products|
-  #     products.resources :comments
-  #     products.resources :sales, :collection => { :recent => :get }
+  #   resources :products do
+  #     resources :comments
+  #     resources :sales do
+  #       get 'recent', :on => :collection
+  #     end
   #   end
 
   # Sample resource route within a namespace:
-  #   map.namespace :admin do |admin|
-  #     # Directs /admin/products/* to Admin::ProductsController (app/controllers/admin/products_controller.rb)
-  #     admin.resources :products
+  #   namespace :admin do
+  #     # Directs /admin/products/* to Admin::ProductsController
+  #     # (app/controllers/admin/products_controller.rb)
+  #     resources :products
   #   end
 
-  # You can have the root of your site routed with map.root -- just remember to delete public/index.html.
-  # map.root :controller => "welcome"
-  map.root :controller => "main"
+  # You can have the root of your site routed with "root"
+  # just remember to delete public/index.html.
+   #root :to => "main#index"
 
   # See how all your routes lay out with "rake routes"
 
-  # Install the default routes as the lowest priority.
-  map.connect ':controller/:action/:id'
-  map.connect ':controller/:action/:id.:format'
-end
+  # This is a legacy wild controller route that's not recommended for RESTful applications.
+  # Note: This route will make all actions in every controller accessible via GET requests.
+  # match ':controller(/:action(/:id(.:format)))'
