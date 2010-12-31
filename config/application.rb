@@ -21,12 +21,12 @@ module Sims
     #
     # Custom directories with classes and modules you want to be autoloadable.
     # config.autoload_paths += %W(#{config.root}/extras)
-    config.autoload_paths += %W(#{config.root}/reports)
+    config.autoload_paths += %W(#{config.root}/app/reports #{config.root}/lib)
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
     # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
-    config.plugins = [ :validates_date_time, :all ]
+    config.plugins = [ :validates_date_time, :paperclip, :statistics, :rails_upgrade, :spawn, :will_paginate, :unobtrusive_date_picker, :annotate_models, :acts_as_list ]#, :railmail2] #, :all ]  railmail is currently broken
 
     # Activate observers that should always be running.
     # config.active_record.observers = :cacher, :garbage_collector, :forum_observer

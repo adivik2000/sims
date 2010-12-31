@@ -1,4 +1,6 @@
 Sims::Application.routes.draw do
+#TODO FIXME The path prefixes are missing, I might want to remove the deep nesting.
+
   match '/doc/' => 'doc#index', :as => :doc
 
   resources :unattached_interventions do
@@ -49,7 +51,8 @@ Sims::Application.routes.draw do
         get :check_id_state
       end
     end
-    resources :flag_categories
+  #FIXME the name prefix does not work here
+  resources :flag_categories, :name_prefix  => ''
   end
 
   namespace :school do
@@ -116,7 +119,19 @@ Sims::Application.routes.draw do
     end
   end
 
-  namespace :checklist_builder do
+#FIXME, this did not translate right at all 
+
+#  map.namespace :checklist_builder do |checklist_builder|
+#    checklist_builder.resources :checklists,  :member => { :preview => :get, :new_from_this => :post } do |checklist|
+#      checklist.resources :questions, :member => {:move=> :post},:name_prefix=>"checklist_builder_" do |question|
+#        question.resources :elements, :member => {:move=> :post},:name_prefix=>"checklist_builder_" do |element|
+#          element.resources :answers, :member => {:move => :post}, :name_prefix=>"checklist_builder_"
+#        end 
+#      end 
+#    end 
+#  end
+#
+ namespace :checklist_builder do
     resources :checklists do
       resources :questions do
         resources :elements do
@@ -129,6 +144,9 @@ Sims::Application.routes.draw do
       end
     end
   end
+
+#FIXME Nor this one either:  missing nexted move methods (confirm) and namespaces
+ 
 
   namespace :intervention_builder do
     resources :probes do
@@ -154,6 +172,7 @@ Sims::Application.routes.draw do
     end
   end
 
+  #FIXME missing name_prefix, 
   namespace :interventions do
     resources :goals do
       resources :objectives do
@@ -182,7 +201,7 @@ Sims::Application.routes.draw do
     end
   end
 
-  match '/' => 'main#index'
+  root :to => "main#index"
   match '/:controller(/:action(/:id))'
 end
 
