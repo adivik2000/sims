@@ -3,16 +3,18 @@ begin
 rescue NameError
   h='example.com'
 end
+SubdomainFu.configure do |config|
 
 size = h.split(".").length() -1
 
-SubdomainFu.tld_sizes = {:development => 0,
+config.tld_sizes = {:development => 0,
                          :development_with_cache => 0,
                          :test => 1,
                          :production => size,
                          :staging => size,
                          :cucumber => 1
                          }
-SubdomainFu.mirrors = 'www'
-SubdomainFu.preferred_mirror = "www"
+config.mirrors = 'www'
+config.preferred_mirror = "www"
+end
  
