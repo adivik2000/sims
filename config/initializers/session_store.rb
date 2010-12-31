@@ -4,10 +4,6 @@ domain=nil
 domain =  ".#{SIMS_DOMAIN}" if defined? SIMS_DOMAIN
     
 
-ActionController::Base.session = sessionhash
-
-
-
 Sims::Application.config.session_store :cookie_store, :key => '_sims_session', :domain => domain
 
 # Use the database for sessions instead of the cookie-based default,
